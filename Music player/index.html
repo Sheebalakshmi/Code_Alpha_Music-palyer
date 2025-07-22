@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Music Player</title>
+    <style>
+      body {
+        font-family: Georgia, Times, 'Times New Roman', serif;
+        text-align: center;
+        padding: 40px;
+        background-color: rgb(0, 0, 0);
+      
+      }
+     
+      .player {
+        background: #79bcfe;
+        padding: 20px;
+        border-radius: 30px;
+        width: 300px;
+        margin: auto;
+        padding-top: 40px;
+      }
+      button {
+        margin: 5px;
+        padding: 10px;
+        border-radius: 10px;
+      }
+      .progress {
+        width: 100%;
+        height: 8px;
+        background: #f4f2f2;
+        margin: 10px 0;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      .progress-bar {
+        height: 10px;
+        background: #f90000;
+        width: 0%;
+      }
+      .volume {
+        width: 100px;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        cursor: pointer;
+        padding: 5px;
+      }
+      li.active {
+        color: green;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="player">
+      <h3 id="title">Title</h3>
+      <p id="details">Artist & Album</p>
+      <audio id="audio" controls></audio>
+      <div>
+        <button onclick="prev()">⏮</button>
+        <button onclick="togglePlay()" id="playBtn">▶</button>
+        <button onclick="next()">⏭</button>
+      </div>
+
+      <div class="progress" onclick="setProgress(event)">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <div>
+        Volume:
+        <input type="range" id="volume" min="0" max="1" step="0.1" value="1" />
+      </div>
+
+      <ul id="playlist"></ul>
+    </div>
+
+    <script>
+      const songs = [
+        {
+          title: "Kallai Mattum Kandal",
+          artist: "Kamal Haasan",
+          album: "Dasavathaaram",
+          src: "Dhasaavathaaram - Tamil - Kallaimattum Kandal Video  Kamal Hassan.mp3"
+        },
+        {
+          title: "Para Para Paravai Ondru",
+          artist: "Yuvan Shankar Raja",
+          album: "Aadukalam",
+          src: "Para Para Paravai Ondru  Neerparavai  Female version  Lyrical Video.mp3"
+        },
+        {
+          title: "Pookal Pookum Tharunam",
+          artist: "G.V. Prakash, Andrea",
+          album: "Madrasapattinam",
+          src: "Madharasapattinam - Pookkal Pookkum Video  Aarya, Amy Jackson.mp3"
+        }
+      ];
+
+      let current = 0;
+      const audio = document.getElementById("audio");
+      const title = document.getElementById("title");
+      const details = document.getElementById("details");
+      const playBtn = document.getElementById("playBtn");
+      const progressBar = document.getElementById("progressBar");
+      const volumeSlider = document.getElementById("volume");
+      const playlist = document.getElementById("playlist");
+
+      songs.forEach((song, i) => {
+        const li = document.createElement("li");
+        li.textContent = song.title;
+        li.onclick = () => {
+          current = i;
+          load();
+          audio.play();
+          updatePlaylist();
+        };
+        playlist.appendChild(li);
+      });
+
+      function load() {
+        const song = songs[current];
+        audio.src = song.src;
+        title.textContent = song.title;
+        details.textContent = `Artist: ${song.artist} | Album: ${song.album}`;
+        updatePlaylist();
+      }
+
+      function togglePlay() {
+        if (audio.paused) {
+          audio.play();
+          playBtn.textContent = "⏸";
+        } else {
+          audio.pause();
+          playBtn.textContent = "▶";
+        }
+      }
+
+      function next() {
+        current = (current + 1) % songs.length;
+        load();
+        audio.play();
+      }
+
+      function prev() {
+        current = (current - 1 + songs.length) % songs.length;
+        load();
+        audio.play();
+      }
+
+      function updateProgress() {
+        const percent = (audio.currentTime / audio.duration) * 100;
+        progressBar.style.width = percent + "%";
+      }
+
+      function setProgress(e) {
+        const width = e.target.clientWidth;
+        const clickX = e.offsetX;
+        const duration = audio.duration;
+        audio.currentTime = (clickX / width) * duration;
+      }
+
+      function updatePlaylist() {
+        [...playlist.children].forEach((li, i) => {
+          li.className = i === current ? "active" : "";
+        });
+      }
+
+      audio.addEventListener("timeupdate", updateProgress);
+      audio.addEventListener("ended", next);
+      volumeSlider.oninput = () => (audio.volume = volumeSlider.value);
+
+      load();
+    </script>
+  </body>
+</html>
